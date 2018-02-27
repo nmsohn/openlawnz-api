@@ -53,11 +53,11 @@ const CaseType = new GraphQLObjectType({
 			junction: {
 				sqlTable: 'case_to_case',
 				sqlJoins: [
-				  // first the parent table to the junction
-				  (casesTable, junctionTable, args) => `${casesTable}.id = ${junctionTable}.case_id_1`,
-				  // then the junction to the child
-				  (junctionTable, citedByTable, args) => `${junctionTable}.case_id_2 = ${citedByTable}.id`
-				]
+					// first the parent table to the junction
+					(casesTable, junctionTable, args) => `${casesTable}.id = ${junctionTable}.case_id_2`,
+					// then the junction to the child
+					(junctionTable, citedByTable, args) => `${junctionTable}.case_id_1 = ${citedByTable}.id`
+				  ]
 			}
 		},
 		cites: {
@@ -65,11 +65,11 @@ const CaseType = new GraphQLObjectType({
 			junction: {
 				sqlTable: 'case_to_case',
 				sqlJoins: [
-				  // first the parent table to the junction
-				  (casesTable, junctionTable, args) => `${casesTable}.id = ${junctionTable}.case_id_2`,
-				  // then the junction to the child
-				  (junctionTable, citedByTable, args) => `${junctionTable}.case_id_1 = ${citedByTable}.id`
-				]
+					// first the parent table to the junction
+					(casesTable, junctionTable, args) => `${casesTable}.id = ${junctionTable}.case_id_1`,
+					// then the junction to the child
+					(junctionTable, citedByTable, args) => `${junctionTable}.case_id_2 = ${citedByTable}.id`
+				  ]
 			}
 		}
 	})
