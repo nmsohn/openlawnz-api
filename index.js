@@ -29,7 +29,7 @@ const CaseType = new GraphQLObjectType({
 	name: 'Case',
 	sqlTable: 'cases',
 	uniqueKey: 'id',
-	fields: {
+	fields: () => ({
 		id: { 
 			type: GraphQLInt
 		},
@@ -47,8 +47,32 @@ const CaseType = new GraphQLObjectType({
 		},
 		case_name: {
 			type: GraphQLString
+		},
+		cited_by: {
+			type: new GraphQLList(CaseType),
+			junction: {
+				sqlTable: 'case_to_case',
+				sqlJoins: [
+				  // first the parent table to the junction
+				  (casesTable, junctionTable, args) => `${casesTable}.id = ${junctionTable}.case_id_1`,
+				  // then the junction to the child
+				  (junctionTable, citedByTable, args) => `${junctionTable}.case_id_2 = ${citedByTable}.id`
+				]
+			}
+		},
+		cites: {
+			type: new GraphQLList(CaseType),
+			junction: {
+				sqlTable: 'case_to_case',
+				sqlJoins: [
+				  // first the parent table to the junction
+				  (casesTable, junctionTable, args) => `${casesTable}.id = ${junctionTable}.case_id_2`,
+				  // then the junction to the child
+				  (junctionTable, citedByTable, args) => `${junctionTable}.case_id_1 = ${citedByTable}.id`
+				]
+			}
 		}
-	}
+	})
 })
 
 function dbCall(sql) {
