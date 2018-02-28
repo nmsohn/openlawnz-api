@@ -48,6 +48,13 @@ const CaseType = new GraphQLObjectType({
 		case_name: {
 			type: GraphQLString
 		},
+		citations: {
+			type: new GraphQLList(CitationType),
+			sqlBatch: {
+				thisKey: 'case_id',
+				parentKey: 'id'
+			}
+		},
 		cited_by: {
 			type: new GraphQLList(CaseType),
 			junction: {
@@ -71,6 +78,20 @@ const CaseType = new GraphQLObjectType({
 					(junctionTable, citedByTable, args) => `${junctionTable}.case_id_2 = ${citedByTable}.id`
 				  ]
 			}
+		}
+	})
+})
+
+const CitationType = new GraphQLObjectType({
+	name: 'CaseCitations',
+	sqlTable: 'case_citations',
+	uniqueKey: 'citation',
+	fields: () => ({
+		case_id: { 
+			type: GraphQLInt
+		},
+		citation: {
+			type: GraphQLString
 		}
 	})
 })
