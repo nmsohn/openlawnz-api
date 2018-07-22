@@ -13,6 +13,7 @@ const express = require("express");
 const mysql = require("mysql");
 const graphqlHTTP = require("express-graphql");
 const GraphQLDate = require("graphql-date");
+const cors = require('cors')
 
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -33,9 +34,6 @@ const CaseType = new GraphQLObjectType({
     },
     pdf_fetch_date: {
       type: GraphQLDate
-    },
-    pdf_name: {
-      type: GraphQLString
     },
     bucket_key: {
       type: GraphQLString
@@ -146,7 +144,10 @@ const LegislationReferenceType = new GraphQLObjectType({
     },
     section: {
       type: GraphQLString
-    }
+    },
+    count: {
+      type: GraphQLInt
+    },
   })
 });
 
@@ -202,22 +203,31 @@ var QueryRoot = new GraphQLObjectType({
       },
       resolve: standardResolver
     },
-    legislation: {
+    legislations: {
       type: new GraphQLList(LegislationType),
       resolve: standardResolver
     },
-    singleLegislation: {
+    legislation: {
       type: LegislationType,
       args: {
         id: {
           description: "The legislation's ID number",
-          type: new GraphQLNonNull(GraphQLInt)
+          type: GraphQLInt
+        },
+        title: {
+          description: "The legislation's title",
+          type: GraphQLString
         }
       },
       // this function generates the WHERE condition
       where: (legislationTable, args, context) => {
+
         // eslint-disable-line no-unused-vars
-        return `${legislationTable}.id = ${args.id}`;
+        if(args.id) {
+          return `${legislationTable}.id = ${args.id}`;
+        } else if(args.title) {
+          return `${legislationTable}.title = ${args.title}`;
+        }
       },
       resolve: standardResolver
     }
@@ -227,6 +237,7 @@ var QueryRoot = new GraphQLObjectType({
 var schema = new GraphQLSchema({ query: QueryRoot });
 
 var app = express();
+app.use(cors())
 app.use(
   "/graphql",
   graphqlHTTP({
@@ -234,6 +245,9 @@ app.use(
     graphiql: true
   })
 );
+
 app.listen(process.env.PORT || 4000);
 
 console.log("Running a GraphQL API server at localhost:4000/graphql");
+
+//https://stackoverflow.com/questions/41614739/deploy-eb-through-aws-sdk
