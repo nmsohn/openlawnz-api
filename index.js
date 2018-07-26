@@ -24,6 +24,23 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+const PDFType = new GraphQLObjectType({
+  name: "PDF",
+  sqlTable: "case_pdf",
+  uniqueKey: "pdf_id",
+  fields: () => ({
+    pdf_id: {
+      type: GraphQLInt
+    },
+    fetch_date: {
+      type: GraphQLDate
+    },
+    bucket_key: {
+      type: GraphQLString
+    }
+  })
+})
+
 const CaseType = new GraphQLObjectType({
   name: "Case",
   sqlTable: "cases",
@@ -32,17 +49,24 @@ const CaseType = new GraphQLObjectType({
     id: {
       type: GraphQLInt
     },
-    pdf_fetch_date: {
+    case_date: {
       type: GraphQLDate
-    },
-    bucket_key: {
-      type: GraphQLString
     },
     case_text: {
       type: GraphQLString
     },
     case_name: {
       type: GraphQLString
+    },
+    pdf_id: {
+      type: GraphQLInt
+    },
+    PDF: {
+      type: PDFType,
+      sqlBatch: {
+        thisKey: "pdf_id",
+        parentKey: "pdf_id"
+      }
     },
     citations: {
       type: new GraphQLList(CitationType),
@@ -54,28 +78,28 @@ const CaseType = new GraphQLObjectType({
     cited_by: {
       type: new GraphQLList(CaseType),
       junction: {
-        sqlTable: "case_to_case",
+        sqlTable: "cases_cited",
         sqlJoins: [
           // first the parent table to the junction
           (casesTable, junctionTable, args) =>
-            `${casesTable}.id = ${junctionTable}.case_id_2`,
+            `${casesTable}.id = ${junctionTable}.case_cited`,
           // then the junction to the child
           (junctionTable, citedByTable, args) =>
-            `${junctionTable}.case_id_1 = ${citedByTable}.id`
+            `${junctionTable}.case_origin = ${citedByTable}.id`
         ]
       }
     },
     cites: {
       type: new GraphQLList(CaseType),
       junction: {
-        sqlTable: "case_to_case",
+        sqlTable: "cases_cited",
         sqlJoins: [
           // first the parent table to the junction
           (casesTable, junctionTable, args) =>
-            `${casesTable}.id = ${junctionTable}.case_id_1`,
+            `${casesTable}.id = ${junctionTable}.case_origin`,
           // then the junction to the child
           (junctionTable, citedByTable, args) =>
-            `${junctionTable}.case_id_2 = ${citedByTable}.id`
+            `${junctionTable}.case_cited = ${citedByTable}.id`
         ]
       }
     },
@@ -127,27 +151,27 @@ const LegislationReferenceType = new GraphQLObjectType({
     legislation_id: {
       type: GraphQLInt
     },
+    section: {
+      type: GraphQLString
+    },
+    case_id: {
+      type: GraphQLInt
+    },
+    count: {
+      type: GraphQLInt
+    },
     legislation: {
       type: LegislationType,
       sqlJoin(referenceTable, legislationTable) {
         return `${referenceTable}.legislation_id = ${legislationTable}.id`;
       }
     },
-    case_id: {
-      type: GraphQLInt
-    },
     case: {
       type: CaseType,
       sqlJoin(referenceTable, caseTable) {
         return `${referenceTable}.case_id = ${caseTable}.id`;
       }
-    },
-    section: {
-      type: GraphQLString
-    },
-    count: {
-      type: GraphQLInt
-    },
+    }
   })
 });
 
@@ -238,6 +262,15 @@ var schema = new GraphQLSchema({ query: QueryRoot });
 
 var app = express();
 app.use(cors())
+app.get("/search", (req, res) => {
+
+  connection.query("SELECT id, case_name, case_date from cases.cases where match(case_text) against(?)", [req.query.q], function (error, results, fields) {
+    if (error) throw error;
+    res.json(results)
+  });
+
+})
+
 app.use(
   "/graphql",
   graphqlHTTP({
@@ -249,5 +282,3 @@ app.use(
 app.listen(process.env.PORT || 4000);
 
 console.log("Running a GraphQL API server at localhost:4000/graphql");
-
-//https://stackoverflow.com/questions/41614739/deploy-eb-through-aws-sdk
