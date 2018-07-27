@@ -15,14 +15,12 @@ const graphqlHTTP = require("express-graphql");
 const GraphQLDate = require("graphql-date");
 const cors = require('cors')
 
-const connection = mysql.createConnection({
+const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: "cases"
 });
-
-connection.connect();
 
 const PDFType = new GraphQLObjectType({
   name: "PDF",
@@ -191,12 +189,14 @@ const CitationType = new GraphQLObjectType({
 
 function dbCall(sql) {
   return new Promise(function(resolve, reject) {
-    connection.query(sql, (err, results, fields) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(results);
+    pool.getConnection(function(err, connection) {
+      connection.query(sql, (err, results, fields) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(results);
+      });
     });
   });
 }
@@ -263,10 +263,11 @@ var schema = new GraphQLSchema({ query: QueryRoot });
 var app = express();
 app.use(cors())
 app.get("/search", (req, res) => {
-
-  connection.query("SELECT id, case_name, case_date from cases.cases where match(case_text) against(?)", [req.query.q], function (error, results, fields) {
-    if (error) throw error;
-    res.json(results)
+  pool.getConnection(function(err, connection) {
+    connection.query("SELECT id, case_name, case_date from cases.cases where match(case_text) against(?)", [req.query.q], function (error, results, fields) {
+      if (error) throw error;
+      res.json(results)
+    });
   });
 
 })
