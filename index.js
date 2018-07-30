@@ -144,7 +144,7 @@ const LegislationType = new GraphQLObjectType({
 const LegislationReferenceType = new GraphQLObjectType({
   name: "LegislationReferences",
   sqlTable: "legislation_to_cases",
-  uniqueKey: "section",
+  uniqueKey: ["legislation_id", "section", "case_id"],
   fields: () => ({
     legislation_id: {
       type: GraphQLInt
@@ -264,6 +264,7 @@ var app = express();
 app.use(cors())
 app.get("/search", (req, res) => {
   pool.getConnection(function(err, connection) {
+    console.log(err);
     connection.query("SELECT id, case_name, case_date from cases.cases where match(case_text) against(?)", [req.query.q], function (error, results, fields) {
       if (error) throw error;
       res.json(results)
