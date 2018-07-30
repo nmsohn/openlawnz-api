@@ -16,6 +16,7 @@ const GraphQLDate = require("graphql-date");
 const cors = require('cors')
 
 const pool = mysql.createPool({
+  connectionLimit : 10,
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
@@ -189,14 +190,12 @@ const CitationType = new GraphQLObjectType({
 
 function dbCall(sql) {
   return new Promise(function(resolve, reject) {
-    pool.getConnection(function(err, connection) {
-      connection.query(sql, (err, results, fields) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(results);
-      });
+    pool.query(sql, (err, results, fields) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(results);
     });
   });
 }
@@ -263,11 +262,12 @@ var schema = new GraphQLSchema({ query: QueryRoot });
 var app = express();
 app.use(cors())
 app.get("/search", (req, res) => {
-  pool.getConnection(function(err, connection) {
-    connection.query("SELECT id, case_name, case_date from cases.cases where match(case_text) against(?)", [req.query.q], function (error, results, fields) {
-      if (error) throw error;
-      res.json(results)
-    });
+
+  pool.query("SELECT id, case_name, case_date from cases.cases where match(case_text) against(?)", [req.query.q], function (error, results, fields) {
+
+    if (error) throw error;
+    res.json(results)
+
   });
 
 })
