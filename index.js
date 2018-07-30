@@ -145,7 +145,7 @@ const LegislationType = new GraphQLObjectType({
 const LegislationReferenceType = new GraphQLObjectType({
   name: "LegislationReferences",
   sqlTable: "legislation_to_cases",
-  uniqueKey: "section",
+  uniqueKey: ["legislation_id", "section", "case_id"],
   fields: () => ({
     legislation_id: {
       type: GraphQLInt
