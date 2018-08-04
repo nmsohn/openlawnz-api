@@ -184,6 +184,12 @@ const CitationType = new GraphQLObjectType({
     },
     citation: {
       type: GraphQLString
+    },
+    case: {
+      type: CaseType,
+      sqlJoin(referenceTable, caseTable) {
+        return `${referenceTable}.case_id = ${caseTable}.id`;
+      }
     }
   })
 });
@@ -223,6 +229,21 @@ var QueryRoot = new GraphQLObjectType({
       where: (casesTable, args, context) => {
         // eslint-disable-line no-unused-vars
         return `${casesTable}.id = ${args.id}`;
+      },
+      resolve: standardResolver
+    },
+    citation: {
+      type: CitationType,
+      args: {
+        citation: {
+          description: "The case citation",
+          type: GraphQLString
+        }
+      },
+      // this function generates the WHERE condition
+      where: (caseCitationTable, args, context) => {
+        // eslint-disable-line no-unused-vars
+        return `${caseCitationTable}.citation = ${args.citation}`;
       },
       resolve: standardResolver
     },
