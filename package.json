@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index",
     "dev": "rm -rf debug && mkdir debug && babel index.js -o debug/index.js --presets @babel/env && DEBUG=join-monster node -r dotenv/config debug/index.js",
-    "build": "rm -rf .tmp && mkdir .tmp && mkdir -p dist && babel index.js -o .tmp/index.js --presets @babel/env && cp package.json .tmp/ && zip dist/dist.zip .tmp/* -j && rm -rf .tmp"
+    "build": "rm -rf .tmp && mkdir .tmp && mkdir -p dist && babel index.js -o .tmp/index.js --presets @babel/env && cp package.json .tmp/ && zip dist/dist.zip .tmp/* -j && rm -rf .tmp",
+    "test": "rm -rf .tmp && mkdir .tmp && mkdir -p dist && babel index.js -o .tmp/index.js --presets @babel/env && cp package.json .tmp/ && zip dist/dist.zip .tmp/* -j && rm -rf .tmp"
   },
   "dependencies": {
     "cors": "^2.8.5",
