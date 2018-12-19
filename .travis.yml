@@ -1,0 +1,9 @@
+deploy:
+  - provider: elasticbeanstalk
+    region: ap-southeast-2
+    env: openlawnz-api-dev-env
+    app: "OpenLaw NZ"
+    zip_file: "dist/dist.zip"
+    skip_cleanup: true
+    on:
+      branch: dev
