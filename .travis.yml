@@ -12,3 +12,13 @@ deploy:
     skip_cleanup: true
     on:
       branch: dev
+  - provider: elasticbeanstalk
+    region: ap-southeast-2
+    env: openlawnz-api-prod-env
+    app: "OpenLaw NZ"
+    bucket_name: openlawnz-api-deploy
+    bucket_path: prod
+    zip_file: "dist/dist.zip"
+    skip_cleanup: true
+    on:
+      branch: master
