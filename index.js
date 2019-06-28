@@ -80,10 +80,10 @@ const CaseType = new GraphQLObjectType({
         sqlTable: "cases_cited",
         sqlJoins: [
           // first the parent table to the junction
-          (casesTable, junctionTable, args) =>
+          (casesTable, junctionTable) =>
             `${casesTable}.id = ${junctionTable}.case_cited`,
           // then the junction to the child
-          (junctionTable, citedByTable, args) =>
+          (junctionTable, citedByTable) =>
             `${junctionTable}.case_origin = ${citedByTable}.id`
         ]
       }
@@ -94,10 +94,10 @@ const CaseType = new GraphQLObjectType({
         sqlTable: "cases_cited",
         sqlJoins: [
           // first the parent table to the junction
-          (casesTable, junctionTable, args) =>
+          (casesTable, junctionTable) =>
             `${casesTable}.id = ${junctionTable}.case_origin`,
           // then the junction to the child
-          (junctionTable, citedByTable, args) =>
+          (junctionTable, citedByTable) =>
             `${junctionTable}.case_cited = ${citedByTable}.id`
         ]
       }
@@ -196,7 +196,7 @@ const CitationType = new GraphQLObjectType({
 
 function dbCall(sql) {
   return new Promise(function(resolve, reject) {
-    pool.query(sql, (err, results, fields) => {
+    pool.query(sql, (err, results) => {
       if (err) {
         reject(err);
         return;
@@ -228,7 +228,7 @@ var QueryRoot = new GraphQLObjectType({
       // this function generates the WHERE condition
       where: (casesTable, args, context) => {
         // eslint-disable-line no-unused-vars
-        return `${casesTable}.id = ${args.id}`;
+        return `${casesTable}.id = ${pool.escape(args.id)}`;
       },
       resolve: standardResolver
     },
@@ -243,7 +243,7 @@ var QueryRoot = new GraphQLObjectType({
       // this function generates the WHERE condition
       where: (caseCitationTable, args, context) => {
         // eslint-disable-line no-unused-vars
-        return `${caseCitationTable}.citation = ${args.citation}`;
+        return `${caseCitationTable}.citation = ${pool.escape(args.citation)}`;
       },
       resolve: standardResolver
     },
@@ -268,9 +268,9 @@ var QueryRoot = new GraphQLObjectType({
 
         // eslint-disable-line no-unused-vars
         if(args.id) {
-          return `${legislationTable}.id = ${args.id}`;
+          return `${legislationTable}.id = ${pool.escape(args.id)}`;
         } else if(args.title) {
-          return `${legislationTable}.title = ${args.title}`;
+          return `${legislationTable}.title = ${pool.escape(args.title)}`;
         }
       },
       resolve: standardResolver
