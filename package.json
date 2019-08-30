@@ -5,9 +5,9 @@
   "license": "MIT",
   "scripts": {
     "start": "node index",
-    "dev": "rm -rf debug && mkdir debug && babel index.js -o debug/index.js --presets @babel/env && DEBUG=join-monster node -r dotenv/config debug/index.js",
+    "dev": "rm -rf debug && mkdir debug && babel index.js -o debug/index.js --presets @babel/env && node -r dotenv/config debug/index.js",
     "build": "rm -rf .tmp && mkdir .tmp && mkdir -p dist && babel index.js -o .tmp/index.js --presets @babel/env && cp package.json .tmp/ && zip dist/dist.zip .tmp/* -j && rm -rf .tmp",
-    "test": "rm -rf .tmp && mkdir .tmp && mkdir -p dist && babel index.js -o .tmp/index.js --presets @babel/env && cp package.json .tmp/ && zip dist/dist.zip .tmp/* -j && rm -rf .tmp"
+    "test": "rm -rf .tmp && mkdir .tmp && mkdir -p dist && babel index.js -o .tmp/index.js --presets @babel/env && cp package.json .tmp/ && zip dist/dist.zip .tmp/* -j && rm -rf .tmp",
   },
   "dependencies": {
     "@graphile-contrib/pg-many-to-many": "^1.0.0-beta.6",
