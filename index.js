@@ -40,7 +40,8 @@ app.use(
       watchPg: true,
       graphiql: true,
       enhanceGraphiql: true,
-      simpleCollections: 'only'
+      simpleCollections: 'only',
+      disableDefaultMutations: true
     }
   )
 );
