@@ -30,7 +30,7 @@ app.use(
     SCHEMA,
     {    
       appendPlugins: [
-        PgSimplifyInflectorPlugin, 
+        PgSimplifyInflectorPlugin,
         PgManyToManyPlugin
       ],
       graphileBuildOptions: {
