@@ -14,11 +14,7 @@
     "@graphile-contrib/pg-simplify-inflector": "^5.0.0-beta.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "express-graphql": "^0.8.0",
     "graphql": "^0.13.2",
-    "graphql-date": "^1.0.3",
-    "join-monster": "^2.1.0",
-    "mysql": "^2.17.1",
     "pg": "^7.12.1",
     "postgraphile": "^4.4.3"
   },
