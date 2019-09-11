@@ -16,7 +16,7 @@
     "graphql": "^0.13.2",
     "graphql-date": "^1.0.3",
     "join-monster": "^2.1.0",
-    "mysql": "^2.17.1"
+    "pg": "^7.12.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.0",

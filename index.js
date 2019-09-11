@@ -10,18 +10,26 @@ import {
 } from "graphql";
 
 const express = require("express");
-const mysql = require("mysql");
+// const mysql = require("mysql");
 const graphqlHTTP = require("express-graphql");
 const GraphQLDate = require("graphql-date");
-const cors = require('cors')
-
-const pool = mysql.createPool({
-  connectionLimit : 10,
-  host: process.env.DB_HOST,
+const cors = require('cors');
+const pg = require('pg');
+const config = {
   user: process.env.DB_USER,
+  database: process.env.POSTGRES_DB,
   password: process.env.DB_PASS,
-  database: "cases"
-});
+  port: process.env.PORT
+};
+const pool = pg.Pool(config);
+
+// const pool = mysql.createPool({
+//   connectionLimit : 10,
+//   host: process.env.DB_HOST,
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASS,
+//   database: "cases"
+// });
 
 const PDFType = new GraphQLObjectType({
   name: "PDF",
@@ -207,7 +215,7 @@ function dbCall(sql) {
 }
 
 function standardResolver(parent, args, context, resolveInfo) {
-  return joinMonster(resolveInfo, context, dbCall, { dialect: "mysql" });
+  return joinMonster(resolveInfo, context, dbCall, { dialect: "pg" });
 }
 
 var QueryRoot = new GraphQLObjectType({
@@ -281,17 +289,17 @@ var QueryRoot = new GraphQLObjectType({
 var schema = new GraphQLSchema({ query: QueryRoot });
 
 var app = express();
-app.use(cors())
+app.use(cors());
 app.get("/search", (req, res) => {
 
   pool.query("SELECT id, case_name, case_date from cases.cases where match(case_text) against(?)", [req.query.q], function (error, results, fields) {
 
     if (error) throw error;
-    res.json(results)
+    res.json(results);
 
   });
 
-})
+});
 
 app.use(
   "/graphql",
